@@ -90,7 +90,6 @@ trap(struct trapframe *tf)
     // PGROUNDDOWN() find the address of page round down
     uint va = PGROUNDDOWN(rcr2());
     uint newsz = myproc()->sz;
-    cprintf("pgf!!! %d\n",myproc()->pid);
     if(rec && rec->recording){
       rec->pgfault++;
     }

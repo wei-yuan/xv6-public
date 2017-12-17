@@ -25,6 +25,7 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int date(struct rtcdate*);
 int proc_uptime(void);
 int perf_stat(struct perfcmd*,struct perfdata*);
 

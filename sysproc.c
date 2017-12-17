@@ -117,10 +117,19 @@ sys_perf_stat(void)
 
   if(cmd->arg1<0){
     return -1;
-  }
-
-  cprintf("sys_perf_stat %s\n",cmd->cmd);
-  
+  }  
   fillperfdata(cmd, data);
+  return 0;
+}
+
+int
+sys_date(void)
+{
+  struct rtcdate* r;
+
+  if(argptr(0, (void*)&r, sizeof(*r)) < 0){
+    return -1;
+  }
+  cmostime(r);
   return 0;
 }

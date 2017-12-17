@@ -178,6 +178,7 @@ UPROGS=\
 	_perf\
 	_pe\
 	_sleep\
+	_date\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
