@@ -341,9 +341,7 @@ scheduler(void)
 
       /* get tick count here */
       p->proc_ticks = ticks;
-      printf(1," proc_ticks = %d", p->proc_ticks);
-      //printf(" proc_ticks ");
-
+      
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
