@@ -123,7 +123,11 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+<<<<<<< 7341568c76b8032586ddf12ab1c4000726df9001
 void            perf(char*);
+=======
+int             proc_uptime(void);
+>>>>>>> change sys_uptime() to proc_uptime(), modify it in defs.h
 
 // swtch.S
 void            swtch(struct context**, struct context*);

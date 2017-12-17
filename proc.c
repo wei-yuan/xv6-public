@@ -340,7 +340,7 @@ scheduler(void)
         continue;
 
       /* get tick count here */
-      p->proc_ticks = sys_uptime();
+      p->proc_ticks = proc_uptime();
       
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
