@@ -6,6 +6,8 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+/* variable ticks is in trap.c */
+#include "traps.h"
 
 struct {
   struct spinlock lock;
@@ -332,9 +334,14 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+    /* round robin scheduling */
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
+      if(p->state != RUNNABLE) // check if the process state is runnable or not
         continue;
+
+      /* get tick count here */
+      p->proc_ticks = ticks;
+      printf(" proc_ticks = %d", p->proc_ticks);
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
