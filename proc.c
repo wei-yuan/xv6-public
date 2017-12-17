@@ -7,7 +7,7 @@
 #include "proc.h"
 #include "spinlock.h"
 /* variable ticks is in trap.c */
-//#include "traps.h"
+#include "traps.h"
 
 struct {
   struct spinlock lock;
@@ -340,7 +340,7 @@ scheduler(void)
         continue;
 
       /* get tick count here */
-      //p->proc_ticks = ticks;
+      p->proc_ticks = sys_uptime();
       
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
