@@ -7,7 +7,7 @@
 #include "proc.h"
 #include "spinlock.h"
 /* variable ticks is in trap.c */
-#include "traps.h"
+//#include "traps.h"
 
 struct {
   struct spinlock lock;
