@@ -13,6 +13,7 @@ struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
+uint pgflts;
 
 void
 tvinit(void)
@@ -76,6 +77,28 @@ trap(struct trapframe *tf)
     cprintf("cpu%d: spurious interrupt at %x:%x\n",
             cpuid(), tf->cs, tf->eip);
     lapiceoi();
+    break;
+
+  // For lazy page allocation 
+  case T_PGFLT:
+    pgflts++;
+
+    // We can handle page fault here
+    //cprintf("page fault, allocating page for the process \n"
+    //        "(pid %d, addr 0x%x, total counts %d)\n", myproc()->pid, tf->eip, pgflts);
+
+    // alloc PA
+    char *mem;
+    mem = kalloc();
+    if(mem == 0){
+      cprintf("pid %d trap out of memory--kill proc\n", myproc()->pid);
+  	  myproc()->killed = 1;
+    }
+    memset(mem, 0, PGSIZE);
+
+    // Create PTE and map page to PGDIR
+    uint a = PGROUNDDOWN(rcr2());
+    mappages(myproc()->pgdir, (char*) a, PGSIZE, V2P(mem), PTE_W | PTE_U);
     break;
 
   //PAGEBREAK: 13
