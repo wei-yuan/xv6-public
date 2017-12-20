@@ -13,7 +13,7 @@ struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
-uint pgflts;
+uint pgflts; // Page fault counts
 
 void
 tvinit(void)
@@ -85,20 +85,19 @@ trap(struct trapframe *tf)
 
     // We can handle page fault here
     //cprintf("page fault, allocating page for the process \n"
-    //        "(pid %d, addr 0x%x, total counts %d)\n", myproc()->pid, tf->eip, pgflts);
-
-    // alloc PA
+    //       "(pid %d, addr 0x%x, total counts %d)\n", myproc()->pid, tf->eip, pgflts);
+    
     char *mem;
-    mem = kalloc();
-    if(mem == 0){
-      cprintf("pid %d trap out of memory--kill proc\n", myproc()->pid);
-  	  myproc()->killed = 1;
+    // rcr2() returns the virtual address that caused page fault
+    // PGROUNDDOWN() find the address of page round down
+    uint va = PGROUNDDOWN(rcr2());
+    uint newsz = myproc()->sz;
+    // Until we have allocated enough memory for process
+    for(; va < newsz; va += PGSIZE){
+      mem = kalloc();
+      memset(mem, 0, PGSIZE);
+      mappages(myproc()->pgdir, (char*) va, PGSIZE, V2P(mem), PTE_W | PTE_U);
     }
-    memset(mem, 0, PGSIZE);
-
-    // Create PTE and map page to PGDIR
-    uint a = PGROUNDDOWN(rcr2());
-    mappages(myproc()->pgdir, (char*) a, PGSIZE, V2P(mem), PTE_W | PTE_U);
     break;
 
   //PAGEBREAK: 13
