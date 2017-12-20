@@ -84,7 +84,7 @@ trap(struct trapframe *tf)
     pgflts++;
 
     // We can handle page fault here
-    //cprintf("page fault, allocating page for the process \n"
+    //cprintf("Page fault occur. Allocating page for the process \n"
     //       "(pid %d, addr 0x%x, total counts %d)\n", myproc()->pid, tf->eip, pgflts);
     
     char *mem;
@@ -92,11 +92,22 @@ trap(struct trapframe *tf)
     // PGROUNDDOWN() find the address of page round down
     uint va = PGROUNDDOWN(rcr2());
     uint newsz = myproc()->sz;
+
     // Until we have allocated enough memory for process
     for(; va < newsz; va += PGSIZE){
       mem = kalloc();
+      if (mem == 0) {
+        cprintf("pid %d trap out of memory--kill proc\n", myproc()->pid);
+        myproc()->killed = 1;
+        break;
+      }
       memset(mem, 0, PGSIZE);
-      mappages(myproc()->pgdir, (char*) va, PGSIZE, V2P(mem), PTE_W | PTE_U);
+      if(mappages(myproc()->pgdir, (char*) va, PGSIZE, V2P(mem), PTE_W | PTE_U) < 0){
+        cprintf("pid %d trap out of memory--kill proc\n", myproc()->pid);
+        kfree(mem);
+        myproc()->killed = 1;
+        break;
+      }
     }
     break;
 
