@@ -93,6 +93,16 @@ sys_uptime(void)
   return xticks;
 }
 
+// counting process ticks
+int
+sys_proc_uptime(void)
+{
+  uint xticks;
+
+  xticks = ticks;
+  return xticks;
+}
+
 int
 sys_perf(void)
 {
