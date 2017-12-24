@@ -91,6 +91,9 @@ void            end_op();
 extern int      ismp;
 void            mpinit(void);
 
+// perfcontext.c
+void            perfcontext(char*);
+
 // picirq.c
 void            picenable(int);
 void            picinit(void);
@@ -120,6 +123,7 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+void            perf(char*);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

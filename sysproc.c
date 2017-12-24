@@ -92,3 +92,14 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_perf(void)
+{
+  char *flag;
+  if(argstr(0, &flag) < 0){
+    return -1;
+  }
+  perf(flag);
+  return 0;
+}
