@@ -103,3 +103,25 @@ strlen(const char *s)
   return n;
 }
 
+int 
+strstarts(const char* pre, const char* str)
+{
+  int lenpre = strlen(pre);
+  int lenstr = strlen(str);
+  if(lenstr < lenpre)
+    return -1;
+  return strncmp(pre, str, lenpre);
+}
+
+char *
+strncat(char *dst, const char *src, int n)
+{
+  char *ret = dst;
+  while (*dst)
+      dst++;
+  while (n--)
+      if (!(*dst++ = *src++))
+          return ret;
+  *dst = 0;
+  return ret;
+}
