@@ -9,7 +9,7 @@ const char help_dash_string[] = "--help";
 const char dash_string[] = "--";
 const char hardware_event_string[] = "[Hardware event]";
 const char software_event_string[] = "[Software event]";
-const char Hardware_cache_event_stirng[] = "[Hardware cache event]";
+const char Hardware_cache_event_string[] = "[Hardware cache event]";
 const char list_event_string[] = "List of pre-defined events:";
 const char usage_string[] = "usage: perf [FLAG] COMMAND [ARGS]";
 const char common_string[] = "The most commonly used perf commands are:";
@@ -37,16 +37,16 @@ struct map list_items[] = {
   { "page-faults OR faults                      ", software_event_string},
   { "context-switches OR cs                     ", software_event_string},
   { "", ""},  
-  { "L1-dcache-loads                            ", Hardware_cache_event_stirng},
-  { "L1-dcache-load-misses                      ", Hardware_cache_event_stirng},
-  { "L1-dcache-stores                           ", Hardware_cache_event_stirng},
-  { "L1-dcache-store-misses                     ", Hardware_cache_event_stirng},
-  { "L1-dcache-prefetches                       ", Hardware_cache_event_stirng},
-  { "L1-dcache-prefetch-misses                  ", Hardware_cache_event_stirng},
-  { "L1-icache-loads                            ", Hardware_cache_event_stirng},
-  { "L1-icache-load-misses                      ", Hardware_cache_event_stirng},
-  { "L1-icache-prefetches                       ", Hardware_cache_event_stirng},
-  { "L1-icache-prefetch-misses                  ", Hardware_cache_event_stirng}
+  { "L1-dcache-loads                            ", Hardware_cache_event_string},
+  { "L1-dcache-load-misses                      ", Hardware_cache_event_string},
+  { "L1-dcache-stores                           ", Hardware_cache_event_string},
+  { "L1-dcache-store-misses                     ", Hardware_cache_event_string},
+  { "L1-dcache-prefetches                       ", Hardware_cache_event_string},
+  { "L1-dcache-prefetch-misses                  ", Hardware_cache_event_string},
+  { "L1-icache-loads                            ", Hardware_cache_event_string},
+  { "L1-icache-load-misses                      ", Hardware_cache_event_string},
+  { "L1-icache-prefetches                       ", Hardware_cache_event_string},
+  { "L1-icache-prefetch-misses                  ", Hardware_cache_event_string}
 };
 
 void
