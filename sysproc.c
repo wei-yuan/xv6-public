@@ -113,3 +113,18 @@ sys_perf(void)
   perf(flag);
   return 0;
 }
+
+int
+sys_perf_stat(void)
+{
+  struct perfcmd* cmd;
+  struct perfdata* data;
+
+  // get from user space
+  if(argptr(1, (void*)&cmd, sizeof(*cmd)) < 0 || argptr(1, (void*)&data, sizeof(*data)) < 0)
+    return -1;
+
+  // fill data then return
+
+  return perf_stat(cmd, data);
+}

@@ -544,3 +544,9 @@ perf(char* flag)
 {
   perfcontext(flag);
 }
+
+void      
+perf_stat(struct perfcmd *cmd, struct perfdata *data)
+{
+  
+}
