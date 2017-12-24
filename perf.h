@@ -6,6 +6,6 @@ struct perfdata {
 };
 
 struct perfcmd{
-    char* cmd;
-    int arg1;
+    char* cmd; //
+    int arg1; // specific pid, if 0 -> system level
 };
