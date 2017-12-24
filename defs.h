@@ -5,6 +5,8 @@ struct inode;
 struct pipe;
 struct proc;
 struct rtcdate;
+struct perfdata;
+struct perfcmd;
 struct spinlock;
 struct sleeplock;
 struct stat;
