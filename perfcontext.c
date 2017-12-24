@@ -22,31 +22,31 @@ struct map {
 };
 
 struct map cmds[] = {
-	{ list_string, "List all symbolic event types" },
-	{ stat_string, "Run a command and gather performance counter statistics" },
-  { sched_string, "Tool to trace/measure scheduler properties (latencies)" }
+	{ list_string, "            List all symbolic event types" },
+	{ stat_string, "            Run a command and gather performance counter statistics" },
+  { sched_string, "           Tool to trace/measure scheduler properties (latencies)" }
 };
 
 struct map list_items[] = {
- 	{ "cpu-cycles OR cycles", hardware_event_string },
-	{ "instructions", hardware_event_string },
-  { "cache-misses", hardware_event_string },
-  { "branch-misses", hardware_event_string},
+ 	{ "cpu-cycles OR cycles                       ", hardware_event_string },
+	{ "instructions                               ", hardware_event_string },
+  { "cache-misses                               ", hardware_event_string },
+  { "branch-misses                              ", hardware_event_string},
   { "", ""},
-  { "cpu-clock", software_event_string},
-  { "page-faults OR faults", software_event_string},
-  { "context-switches OR cs", software_event_string},
+  { "cpu-clock                                  ", software_event_string},
+  { "page-faults OR faults                      ", software_event_string},
+  { "context-switches OR cs                     ", software_event_string},
   { "", ""},  
-  { "L1-dcache-loads", Hardware_cache_event_stirng},
-  { "L1-dcache-load-misses", Hardware_cache_event_stirng},
-  { "L1-dcache-stores", Hardware_cache_event_stirng},
-  { "L1-dcache-store-misses", Hardware_cache_event_stirng},
-  { "L1-dcache-prefetches", Hardware_cache_event_stirng},
-  { "L1-dcache-prefetch-misses", Hardware_cache_event_stirng},
-  { "L1-icache-loads", Hardware_cache_event_stirng},
-  { "L1-icache-load-misses", Hardware_cache_event_stirng},
-  { "L1-icache-prefetches", Hardware_cache_event_stirng},
-  { "L1-icache-prefetch-misses", Hardware_cache_event_stirng}
+  { "L1-dcache-loads                            ", Hardware_cache_event_stirng},
+  { "L1-dcache-load-misses                      ", Hardware_cache_event_stirng},
+  { "L1-dcache-stores                           ", Hardware_cache_event_stirng},
+  { "L1-dcache-store-misses                     ", Hardware_cache_event_stirng},
+  { "L1-dcache-prefetches                       ", Hardware_cache_event_stirng},
+  { "L1-dcache-prefetch-misses                  ", Hardware_cache_event_stirng},
+  { "L1-icache-loads                            ", Hardware_cache_event_stirng},
+  { "L1-icache-load-misses                      ", Hardware_cache_event_stirng},
+  { "L1-icache-prefetches                       ", Hardware_cache_event_stirng},
+  { "L1-icache-prefetch-misses                  ", Hardware_cache_event_stirng}
 };
 
 void
@@ -56,7 +56,7 @@ perflist()
   array_size = sizeof(list_items) / sizeof(struct map);
 	cprintf("\n %s\n\n", list_event_string);
 	for (i = 0; i < array_size; i++) {
-		cprintf("   %s  %s\n", list_items[i].name, list_items[i].descript);
+		cprintf("   %s%s\n", list_items[i].name, list_items[i].descript);
 	}
   cprintf("\n");
 }
@@ -82,7 +82,7 @@ perfhelp()
   cprintf("\n %s\n\n", usage_string);
   cprintf(" %s\n", common_string);
 	for (i = 0; i < array_size; i++) {
-		cprintf("   %s  %s\n", cmds[i].name, cmds[i].descript);
+		cprintf("   %s%s\n", cmds[i].name, cmds[i].descript);
 	}
   cprintf("\n");
 }
