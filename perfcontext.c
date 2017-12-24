@@ -87,16 +87,22 @@ perfhelp()
   cprintf("\n");
 }
 
+int
+strcmp(char* flag, const char* perf_string)
+{
+  return strncmp(flag, perf_string, strlen(perf_string));
+}
+
 void
 perfcontext(char* flag)
 {
-  if (strncmp(flag, list_string, 4) == 0){
+  if (strcmp(flag, list_string) == 0){
     perflist();
-  } else if (strncmp(flag, stat_string, 4) == 0){
+  } else if (strcmp(flag, stat_string) == 0){
     perfstat();
-  } else if(strncmp(flag, sched_string, 4) == 0){
+  } else if(strcmp(flag, sched_string) == 0){
     perfsched();
-  } else if(strncmp(flag, help_string, 4) == 0 || strncmp(flag, help_dash_string, 4) == 0){
+  } else if(strcmp(flag, help_string) == 0 || strcmp(flag, help_dash_string) == 0){
     perfhelp();
   } else {
     cprintf(unknown_cmd_string, flag);    
