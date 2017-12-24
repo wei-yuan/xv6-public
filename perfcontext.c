@@ -64,7 +64,8 @@ perflist()
 void
 perfstat()
 {
-  cprintf(not_implement_string, stat_string);
+  //cprintf(not_implement_string, stat_string);
+    
 }
 
 void
