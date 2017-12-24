@@ -12,7 +12,7 @@ int main(int argc, char *argv[]){
         exit();
     }
 
-    printf(1, "%s %s %s %s",argv[0], argv[1], argv[2], argv[3]);
+    printf(1, "%s %s %s",argv[0], argv[1], argv[2]);
 
     struct perfcmd *cmd ;
     struct perfdata *st, *ed ;
@@ -26,21 +26,23 @@ int main(int argc, char *argv[]){
     ed = malloc(sizeof(*ed));
     memset(ed, 0, sizeof(*ed));
 
-    //stat
-    if(strcmp(argv[1],"st") == 0){
+    //pe stat
+    if(strcmp(argv[1],"stat") == 0){
 
         if(argc < 3){
             printf(2,"few arguments\n");
             exit();
         }
 
-        printf(1,"stat -> %s\n",argv[2]);
+        //hard code
+        cmd->cmd = "stat";
 
         int pid;
         pid = fork();
 
         if(pid == 0){
-            printf(1,"begin %d\n",pid);
+            cmd->arg1 = getpid();
+            printf(1,"begin %d\n",cmd->arg1);
             // perf_stat(cmd,st);
             exec(argv[2], &argv[2]);
             exit();
