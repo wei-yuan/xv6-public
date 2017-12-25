@@ -7,7 +7,7 @@
 #include "proc.h"
 #include "spinlock.h"
 /* variable ticks is in trap.c */
-//#include "traps.h"
+#include "traps.h"
 
 struct {
   struct spinlock lock;
@@ -21,6 +21,8 @@ extern void forkret(void);
 extern void trapret(void);
 
 static void wakeup1(void *chan);
+
+int conswch; // Context switch counts
 
 void
 pinit(void)
@@ -350,6 +352,11 @@ scheduler(void)
       p->state = RUNNING;
 
       swtch(&(c->scheduler), p->context);
+
+      conswch++;
+      p->proc_conswch = conswch;
+      p->proc_pgfault = pgfault;
+
       switchkvm();
 
       // Process is done running for now.
@@ -543,10 +550,4 @@ void
 perf(char* flag)
 {
   perfcontext(flag);
-}
-
-void      
-perf_stat(struct perfcmd *cmd, struct perfdata *data)
-{
-  
 }

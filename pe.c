@@ -43,13 +43,13 @@ int main(int argc, char *argv[]){
         if(pid == 0){
             cmd->arg1 = getpid();
             printf(1,"begin %d\n",cmd->arg1);
-            // perf_stat(cmd,st);
+            perf_stat(cmd,st);
             exec(argv[2], &argv[2]);
             exit();
         }
 
         wait();
-        // perf_stat(cmd,ed);
+        perf_stat(cmd,ed);
 
         int ticks;
         int cxtsw;

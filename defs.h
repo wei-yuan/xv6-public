@@ -127,7 +127,7 @@ void            wakeup(void*);
 void            yield(void);
 void            perf(char*);
 void            perf_stat(struct perfcmd*, struct perfdata*);
-
+extern int      conswch;
 
 // swtch.S
 void            swtch(struct context**, struct context*);
@@ -172,6 +172,7 @@ void            timerinit(void);
 // trap.c
 void            idtinit(void);
 extern uint     ticks;
+extern int      pgfault;
 void            tvinit(void);
 extern struct spinlock tickslock;
 
