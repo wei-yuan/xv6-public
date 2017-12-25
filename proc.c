@@ -343,20 +343,15 @@ scheduler(void)
 
       /* get tick count here */
       p->proc_ticks = ticks;
-      
+
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
-
       swtch(&(c->scheduler), p->context);
-
       conswch++;
-      p->proc_conswch = conswch;
-      p->proc_pgfault = pgfault;
-
       switchkvm();
 
       // Process is done running for now.

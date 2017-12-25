@@ -13,7 +13,7 @@ struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
-int pgfault; // Page fault counts
+int pgfault; // page fault counts
 
 void
 tvinit(void)
@@ -83,7 +83,6 @@ trap(struct trapframe *tf)
   case T_PGFLT:
     pgfault++;
 
-    // We can handle page fault here
     //cprintf("Page fault occur. Allocating page for the process \n"
     //       "(pid %d, addr 0x%x, total counts %d)\n", myproc()->pid, tf->eip, pgflts);
     

@@ -121,14 +121,13 @@ sys_perf_stat(void)
   struct perfcmd* cmd;
   struct perfdata* data;
 
-  if(argptr(0, (void*)&cmd, sizeof(*cmd)) < 0 || argptr(1, (void*)&data, sizeof(*data)) < 0) {
+  if(argptr(0, (void*)&cmd, sizeof(*cmd)) < 0 || 
+  argptr(1, (void*)&data, sizeof(*data)) < 0) {
     return -1;
   }
-
   // fill data
   data->ticks = ticks;
   data->pgfault = pgfault;
   data->conswch = conswch;
-  
   return 0;
 }
