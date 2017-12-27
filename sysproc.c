@@ -7,6 +7,10 @@
 #include "mmu.h"
 #include "proc.h"
 
+/* procdump() */
+#include "spinlock.h"
+
+
 int
 sys_fork(void)
 {
@@ -104,8 +108,98 @@ sys_perf(void)
   return 0;
 }
 
+struct {
+  struct spinlock lock;
+  struct proc proc[NPROC];
+} ptable;
+
 int
-sys_perf_sched(void)
+getTicks(void)
 {
-  return 0;
+  uint xticks;
+
+  xticks = ticks;
+  return xticks;
 }
+
+int
+sys_psched(void)
+{
+  // process struct pointer
+  struct proc *p;
+  // ticks
+  int tick = 0;
+
+  static char *states[] = {
+  [UNUSED]    "unused",
+  [EMBRYO]    "embryo",
+  [SLEEPING]  "sleep ",
+  [RUNNABLE]  "runble",
+  [RUNNING]   "run   ",
+  [ZOMBIE]    "zombie"
+  };  
+  char *state;
+
+  //cprintf("Task\t|\tRuntime ms\t|\tSwitches\t|\tAverage delay ms\t|\tMaximum delay ms\n");
+  cprintf("PID\t|\tProcess State\t|\tTicks\t|\tName\t\n");  
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    //break condition
+    if(p->pid == 0) break;
+    
+    if(p->state == UNUSED)
+      continue;
+    if(p->state >= 0 && p->state < NELEM(states) && states[p->state])
+      state = states[p->state];
+    else
+      state = "???";
+    
+    //print process information
+    cprintf("%d", p->pid);
+    cprintf("\t|\t");
+    cprintf("%s", state);
+    cprintf("\t|\t");
+    cprintf("%d", tick = getTicks());
+    cprintf("\t|\t");
+    cprintf("%s", p->name);
+    cprintf("\n");
+    
+  }
+  //procdump();
+  return 1;
+}
+/*
+void
+procdump(void)
+{
+  static char *states[] = {
+  [UNUSED]    "unused",
+  [EMBRYO]    "embryo",
+  [SLEEPING]  "sleep ",
+  [RUNNABLE]  "runble",
+  [RUNNING]   "run   ",
+  [ZOMBIE]    "zombie"
+  };
+  int i;
+  struct proc *p;
+  char *state;
+  uint pc[10];
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->state == UNUSED)
+      continue;
+    if(p->state >= 0 && p->state < NELEM(states) && states[p->state])
+      state = states[p->state];
+    else
+      state = "???";
+    cprintf("%d %s %s", p->pid, state, p->name);
+    if(p->state == SLEEPING){
+      getcallerpcs((uint*)p->context->ebp+2, pc);
+      for(i=0; i<10 && pc[i] != 0; i++)
+        cprintf(" %p", pc[i]);
+    }
+    cprintf("\n");
+  }
+}
+*/

@@ -179,6 +179,7 @@ UPROGS=\
 	_perf\
 	_pe\
 	_sleep\
+	_user_test_psched\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -251,6 +252,7 @@ EXTRA=\
 	printf.c umalloc.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
+	user_test_psched.c\
 
 dist:
 	rm -rf dist

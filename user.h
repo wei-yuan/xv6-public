@@ -26,9 +26,8 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 void perf(char*);
-int proc_uptime(void);
+int psched(void);
 int perf_stat(struct perfcmd*,struct perfdata*);
-int perf_sched(void);
 
 // ulib.c
 int stat(char*, struct stat*);

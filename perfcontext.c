@@ -68,11 +68,13 @@ perfstat()
     
 }
 
+/*
 void
 perfsched()
 {
   cprintf(not_implement_string, sched_string);
 }
+*/
 
 void
 perfhelp()
@@ -101,7 +103,7 @@ perfcontext(char* flag)
   } else if (strcmp(flag, stat_string) == 0){
     perfstat();
   } else if(strcmp(flag, sched_string) == 0){
-    perfsched();
+    //perfsched();
   } else if(strcmp(flag, help_string) == 0 || strcmp(flag, help_dash_string) == 0){
     perfhelp();
   } else {
