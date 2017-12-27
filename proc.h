@@ -51,6 +51,8 @@ struct proc {
   char name[16];               // Process name (debugging)
   // self defined variable
   int proc_ticks;
+  int proc_conswch;
+  int proc_pgfault;
 };
 
 // Process memory is laid out contiguously, low addresses first:
