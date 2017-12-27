@@ -103,7 +103,6 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
-extern int sys_perf(void);
 extern int sys_proc_uptime(void);
 extern int sys_perf_stat(void);
 
@@ -129,7 +128,6 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
-[SYS_perf]    sys_perf,
 [SYS_proc_uptime]  sys_proc_uptime,
 [SYS_perf_stat]   sys_perf_stat,
 };

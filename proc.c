@@ -540,9 +540,3 @@ procdump(void)
     cprintf("\n");
   }
 }
-
-void
-perf(char* flag)
-{
-  perfcontext(flag);
-}

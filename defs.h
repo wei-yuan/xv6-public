@@ -125,7 +125,6 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-void            perf(char*);
 void            perf_stat(struct perfcmd*, struct perfdata*);
 extern int      conswch;
 
