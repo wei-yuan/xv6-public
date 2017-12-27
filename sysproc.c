@@ -115,8 +115,16 @@ sys_perf_stat(void)
     return -1;
   }
   // fill data
+  /*
   data->ticks = ticks;
   data->pgfault = pgfault;
   data->conswch = conswch;
+  */
+  perf_stat(cmd, data);
+  //if (myproc()->pid == cmd->arg1) {
+    //data->ticks = myproc()->proc_ticks;
+    //data->pgfault = myproc()->proc_pgfault;
+    //data->conswch = myproc()->proc_conswch;
+  //}
   return 0;
 }

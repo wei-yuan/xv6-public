@@ -81,8 +81,8 @@ trap(struct trapframe *tf)
 
   // For lazy page allocation 
   case T_PGFLT:
-    pgfault++;
-
+    //pgfault++;
+    myproc()->proc_pgfault += 1;
     //cprintf("Page fault occur. Allocating page for the process \n"
     //       "(pid %d, addr 0x%x, total counts %d)\n", myproc()->pid, tf->eip, pgflts);
     

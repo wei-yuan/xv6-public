@@ -83,8 +83,10 @@ int main(int argc, char *argv[]){
             exit();
         }
         cmd->arg1 = pid;
+        
         wait();
-        perf_stat(cmd,ed);
+                perf_stat(cmd,ed);
+
 
         printf(1,"\nstart ticks: %d\n",st->ticks);
         printf(1,"start conswch: %d\n",st->conswch);

@@ -8,6 +8,7 @@
 #include "spinlock.h"
 /* variable ticks is in trap.c */
 #include "traps.h"
+#include "perf.h"
 
 struct {
   struct spinlock lock;
@@ -23,6 +24,7 @@ extern void trapret(void);
 static void wakeup1(void *chan);
 
 int conswch; // Context switch counts
+int recording = 0;
 
 void
 pinit(void)
@@ -343,7 +345,7 @@ scheduler(void)
 
       /* get tick count here */
       p->proc_ticks = ticks;
-      p->proc_pgfault = pgfault;
+
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
@@ -351,8 +353,7 @@ scheduler(void)
       switchuvm(p);
       p->state = RUNNING;
       swtch(&(c->scheduler), p->context);
-      conswch++;
-      p->proc_conswch = conswch;      
+      //conswch++;
       switchkvm();
 
       // Process is done running for now.
@@ -386,6 +387,10 @@ sched(void)
   if(readeflags()&FL_IF)
     panic("sched interruptible");
   intena = mycpu()->intena;
+
+  if(recording)   
+    conswch++;
+  
   swtch(&p->context, mycpu()->scheduler);
   mycpu()->intena = intena;
 }
@@ -394,6 +399,7 @@ sched(void)
 void
 yield(void)
 {
+  
   acquire(&ptable.lock);  //DOC: yieldlock
   myproc()->state = RUNNABLE;
   sched();
@@ -539,5 +545,18 @@ procdump(void)
         cprintf(" %p", pc[i]);
     }
     cprintf("\n");
+  }
+}
+
+void
+perf_stat(struct perfcmd *cmd, struct perfdata *data)
+{
+  if(!recording){
+    recording = 1;
+    conswch = 0;
+  }else{
+    data->conswch = conswch;
+    recording = 0;
+    conswch = 0;
   }
 }
