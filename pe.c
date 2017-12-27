@@ -18,19 +18,19 @@ countdigit(int n)
 }
 
 char* 
-mscal(int n)
+calms(int n)
 {
-  const char point[] = "0.";
+  const char zero_point[] = "0.";
   const char zero[] = "0";
   char *result;
   result = "";
-  result = strcat(result, point);
+  result = strcat(result, zero_point);
 
   int i;
   // one million has six zero digit
   int zero_num = 6 - countdigit(n);
   for (i = 0; i < zero_num; i++) {
-   result = strcat(result, zero);  
+    result = strcat(result, zero);  
   }
   return result;
 }
@@ -75,9 +75,6 @@ int main(int argc, char *argv[]){
             cmd->arg1 = getpid();
             printf(1,"begin %d\n",cmd->arg1);
             perf_stat(cmd,st);
-
-  
-
             exec(argv[2], &argv[2]);
 
             exit();
@@ -85,12 +82,11 @@ int main(int argc, char *argv[]){
         cmd->arg1 = pid;
         
         wait();
-                perf_stat(cmd,ed);
-
+        perf_stat(cmd,ed);
 
         printf(1,"\nstart ticks: %d\n",st->ticks);
         printf(1,"start conswch: %d\n",st->conswch);
-        printf(1,"start pgfault: %d\n\n",st->pgfault);
+        printf(1,"start pgfault: %d\n",st->pgfault);
         printf(1,"\nend ticks: %d\n",ed->ticks);
         printf(1,"end conswch: %d\n",ed->conswch);
         printf(1,"end pgfault: %d\n\n",ed->pgfault);
@@ -109,11 +105,6 @@ int main(int argc, char *argv[]){
         printf(1,"context switch: %d\n",cxtsw);
         printf(1,"cpu switch: %d\n",cpusw);
         printf(1,"page fault: %d\n",pgfault);
-
-        // million / second calculation
-        //printf(1,"page fault: %s%d m/s\n", mscal(pgfault), pgfault);        
-        printf(1,"context switch: %s%d m/s\n", mscal(cxtsw), cxtsw);
-
     }
 
     exit();

@@ -7,6 +7,7 @@
 #include "x86.h"
 #include "traps.h"
 #include "spinlock.h"
+#include "perf.h"
 
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
@@ -14,6 +15,7 @@ extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
 int pgfault; // page fault counts
+int pgrecording = 0; // page fault recording
 
 void
 tvinit(void)
@@ -81,11 +83,9 @@ trap(struct trapframe *tf)
 
   // For lazy page allocation 
   case T_PGFLT:
-    //pgfault++;
-    myproc()->proc_pgfault += 1;
-    //cprintf("Page fault occur. Allocating page for the process \n"
-    //       "(pid %d, addr 0x%x, total counts %d)\n", myproc()->pid, tf->eip, pgflts);
-    
+    if(pgrecording == 0)
+      pgfault++;
+
     char *mem;
     // rcr2() returns the virtual address that caused page fault
     // PGROUNDDOWN() find the address of page round down
@@ -141,4 +141,16 @@ trap(struct trapframe *tf)
   // Check if the process has been killed since we yielded
   if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)
     exit();
+}
+
+void
+calpgfault(struct perfdata *data)
+{
+  if(pgrecording == 0){
+    pgrecording = 1;
+  }else{
+    data->pgfault = pgfault;
+    pgrecording = 0;
+    pgfault = 0;
+  }  
 }

@@ -122,8 +122,7 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-void            perf_stat(struct perfcmd*, struct perfdata*);
-extern int      conswch;
+void            fillperfdata(struct perfdata*);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
@@ -168,9 +167,9 @@ void            timerinit(void);
 // trap.c
 void            idtinit(void);
 extern uint     ticks;
-extern int      pgfault;
 void            tvinit(void);
 extern struct spinlock tickslock;
+void            calpgfault(struct perfdata*);
 
 // uart.c
 void            uartinit(void);

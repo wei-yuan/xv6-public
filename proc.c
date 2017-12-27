@@ -23,8 +23,8 @@ extern void trapret(void);
 
 static void wakeup1(void *chan);
 
-int conswch; // Context switch counts
-int recording = 0;
+int conswch; // context switch counts
+int csrecording = 0; // context switch recording
 
 void
 pinit(void)
@@ -353,7 +353,6 @@ scheduler(void)
       switchuvm(p);
       p->state = RUNNING;
       swtch(&(c->scheduler), p->context);
-      //conswch++;
       switchkvm();
 
       // Process is done running for now.
@@ -388,7 +387,7 @@ sched(void)
     panic("sched interruptible");
   intena = mycpu()->intena;
 
-  if(recording)   
+  if(csrecording)   
     conswch++;
   
   swtch(&p->context, mycpu()->scheduler);
@@ -549,14 +548,23 @@ procdump(void)
 }
 
 void
-perf_stat(struct perfcmd *cmd, struct perfdata *data)
+calconswch(struct perfdata *data)
 {
-  if(!recording){
-    recording = 1;
+  if(!csrecording){
+    csrecording = 1;
     conswch = 0;
   }else{
     data->conswch = conswch;
-    recording = 0;
+    csrecording = 0;
     conswch = 0;
-  }
+  }  
+}
+
+void
+fillperfdata(struct perfdata *data)
+{
+  // context switch
+  calconswch(data);   
+  // page fault
+  calpgfault(data);
 }
