@@ -87,7 +87,8 @@ int main(int argc, char *argv[]){
         printf(1,"total ticks: %d\n",ed->totalticks);
         printf(1,"cpu ticks: %d\n",ed->cputicks);
         printf(1,"conswch: %d\n",ed->conswch);
-        printf(1,"pgfault: %d\n\n",ed->pgfault);
+        printf(1,"pgfault: %d\n",ed->pgfault);
+        printf(1,"cpuswch: %d\n\n",ed->cpuswch);
 
     }
 
