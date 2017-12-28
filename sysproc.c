@@ -104,23 +104,6 @@ sys_proc_uptime(void)
   return xticks;
 }
 
-int
-sys_perf_stat(void)
-{
-  struct perfcmd* cmd;
-  struct perfdata* data;
-
-  if(argptr(0, (void*)&cmd, sizeof(*cmd)) < 0 || 
-  argptr(1, (void*)&data, sizeof(*data)) < 0) {
-    return -1;
-  }
-
-  if(cmd->arg1<0){
-    return -1;
-  }  
-  fillperfdata(cmd, data);
-  return 0;
-}
 
 int
 sys_date(void)

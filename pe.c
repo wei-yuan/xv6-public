@@ -43,8 +43,6 @@ int main(int argc, char *argv[]){
         exit();
     }
 
-    printf(1, "%s %s %s",argv[0], argv[1], argv[2]);
-
     struct perfcmd *cmd ;
     struct perfdata *st, *ed ;
 
@@ -74,7 +72,6 @@ int main(int argc, char *argv[]){
         if(pid == 0){
           cmd->cmd = "start";
           cmd->arg1 = getpid();
-          printf(1,"begin %d\n",cmd->arg1);
           perf_stat(cmd,st);
           exec(argv[2], &argv[2]);
         }
@@ -92,20 +89,6 @@ int main(int argc, char *argv[]){
         printf(1,"conswch: %d\n",ed->conswch);
         printf(1,"pgfault: %d\n\n",ed->pgfault);
 
-        // int ticks;
-        // int cxtsw;
-        // int cpusw;
-        // int pgfault;
-        // ticks = (ed->ticks - st->ticks);
-        // cxtsw = (ed->conswch - st->conswch);
-        // cpusw = ed->cpuswch - st->cpuswch;
-        // pgfault = ed->pgfault - st->pgfault;
-
-        // printf(1,"done! %d\n",pid);
-        // printf(1,"ticks: %d\n",ticks);
-        // printf(1,"context switch: %d\n",cxtsw);
-        // printf(1,"cpu switch: %d\n",cpusw);
-        // printf(1,"page fault: %d\n",pgfault);
     }
 
     exit();

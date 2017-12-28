@@ -15,6 +15,9 @@ struct {
   struct proc proc[NPROC];
 } ptable;
 
+struct spinlock lock2;
+
+
 struct perf_record perf_recordtable[NPROC];
 
 static struct proc *initproc;
@@ -38,6 +41,7 @@ void
 pinit(void)
 {
   initlock(&ptable.lock, "ptable");
+  initlock(&lock2,"perf");
   initperf();
 }
 
@@ -604,8 +608,10 @@ procdump(void)
 }
 
 //find available and init
-struct perf_record* setperf(int pid){
+struct perf_record* startperf(int pid){
   struct perf_record* i;
+  
+  acquire(&lock2);
   for( i = perf_recordtable; i < &perf_recordtable[NPROC]; i++){
     if(i->recording)
       continue;
@@ -619,15 +625,18 @@ struct perf_record* setperf(int pid){
     i->_ticks = ticks;
     //lock?
     i->recording = 1;
+    release(&lock2);
     return i;
   }
+  
+  release(&lock2);
   return 0;
 }
 
-int fillperf(int pid, struct perfdata *data){
+int stopperf(int pid, struct perfdata *data){
   struct perf_record* res = getperf(pid);
+  acquire(&lock2);
   if(res){
-    cprintf("fill? %d\n",res->pid);
     data->conswch = res->cxtsw;
     //Page fault not working...
     data->pgfault = res->pgfault;
@@ -635,11 +644,14 @@ int fillperf(int pid, struct perfdata *data){
     data->cputicks = res->sumticks;
     //lock?
     res->recording = 0;
+    release(&lock2);    
     return 0;
   }
+  release(&lock2);
   return -1;
 }
 
+//return 0 if equal.
 int
 strcompare(const char *p, const char *q)
 {
@@ -648,19 +660,30 @@ strcompare(const char *p, const char *q)
   return (uchar)*p - (uchar)*q;
 }
 
-void
-fillperfdata(struct perfcmd* cmd, struct perfdata *data)
+
+int
+sys_perf_stat(void)
 {
+  struct perfcmd* cmd;
+  struct perfdata* data;
+
+  if(argptr(0, (void*)&cmd, sizeof(*cmd)) < 0 || argptr(1, (void*)&data, sizeof(*data)) < 0) {
+    return -1;
+  }
+
+  if(cmd->arg1<0){
+    return -1;
+  }  
 
   if(strcompare(cmd->cmd,"start") == 0){
-    setperf(cmd->arg1);
-    return;
+    startperf(cmd->arg1);
+    return 0;
   }
 
   if(strcompare(cmd->cmd,"end") == 0){
-    fillperf(cmd->arg1,data);
-    return;
+    stopperf(cmd->arg1,data);
+    return 0;
   }
 
-  return;
+  return -1;
 }

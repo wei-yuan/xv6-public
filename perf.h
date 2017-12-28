@@ -19,6 +19,6 @@ struct perf_record{
     int pgfault;
     int _ticks;
     int sumticks;
-    int startticks; //start timestamp;
+    int startticks;
     int endticks;
 };
