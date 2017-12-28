@@ -15,11 +15,7 @@ struct {
   struct proc proc[NPROC];
 } ptable;
 
-struct perecd{
-  int pid;
-  int recording;
-  int cxtsw;
-} perecdtable[NPROC];
+struct perf_record perf_recordtable[NPROC];
 
 static struct proc *initproc;
 
@@ -35,7 +31,7 @@ int csrecording = 0; // context switch recording
 void 
 initperf(void)
 {
-  memset(perecdtable, 0, sizeof(perecdtable));
+  memset(perf_recordtable, 0, sizeof(perf_recordtable));
 }
 
 void
@@ -45,6 +41,15 @@ pinit(void)
   initperf();
 }
 
+struct perf_record* getperf(int pid){
+  struct perf_record* i;
+  for( i = perf_recordtable; i < &perf_recordtable[NPROC]; i++){
+    if(i->pid == pid){
+      return i;
+    }
+  }
+  return 0;
+}
 
 // Must be called with interrupts disabled
 int
@@ -401,8 +406,8 @@ sched(void)
     panic("sched interruptible");
   intena = mycpu()->intena;
 
-  if(csrecording)   
-    conswch++;
+  struct perf_record* r = getperf(p->pid);
+  if(r && r->recording)r->cxtsw++; 
   
   swtch(&p->context, mycpu()->scheduler);
   mycpu()->intena = intena;
@@ -561,52 +566,29 @@ procdump(void)
   }
 }
 
-void
-calconswch(struct perfdata *data)
-{
-  if(!csrecording){
-    csrecording = 1;
-    conswch = 0;
-  }else{
-    data->conswch = conswch;
-    csrecording = 0;
-    conswch = 0;
-  }  
-}
-
-
 //find available and init
-int setperf(int pid){
-  struct perecd* i;
-  for( i = perecdtable; i < &perecdtable[NPROC]; i++){
+struct perf_record* setperf(int pid){
+  struct perf_record* i;
+  for( i = perf_recordtable; i < &perf_recordtable[NPROC]; i++){
     if(i->recording)
       continue;
-    //found!
+    //found and init;
     i->pid = pid;
+    i->cxtsw = 0;
+    i->pgfault = 0;
     //lock?
     i->recording = 1;
-    cprintf("set? %x <- %d\n",i, pid);
-    return 0;
-  }
-  return -1;
-}
-
-struct perecd* getperf(int pid){
-  struct perecd* i;
-  for( i = perecdtable; i < &perecdtable[NPROC]; i++){
-    if(i->pid == pid){
-      cprintf("get? %x -> %d\n",i,pid);
-      return i;
-    }
+    return i;
   }
   return 0;
 }
 
 int fillperf(int pid, struct perfdata *data){
-  struct perecd* res = getperf(pid);
+  struct perf_record* res = getperf(pid);
   if(res){
     cprintf("fill? %d\n",res->pid);
     data->conswch = res->cxtsw;
+    data->pgfault = res->pgfault;
     //lock?
     res->recording = 0;
     return 0;
@@ -637,8 +619,4 @@ fillperfdata(struct perfcmd* cmd, struct perfdata *data)
   }
 
   return;
-  // // context switch
-  // calconswch(data);   
-  // // page fault
-  // calpgfault(data);
 }

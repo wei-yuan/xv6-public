@@ -83,14 +83,17 @@ trap(struct trapframe *tf)
 
   // For lazy page allocation 
   case T_PGFLT:
-    if(pgrecording == 0)
-      pgfault++;
-
+  {
     char *mem;
+    struct perf_record* rec = getperf(myproc()->pid);
     // rcr2() returns the virtual address that caused page fault
     // PGROUNDDOWN() find the address of page round down
     uint va = PGROUNDDOWN(rcr2());
     uint newsz = myproc()->sz;
+    cprintf("pgf!!! %d\n",myproc()->pid);
+    if(rec && rec->recording){
+      rec->pgfault++;
+    }
 
     // Until we have allocated enough memory for process
     for(; va < newsz; va += PGSIZE){
@@ -109,7 +112,7 @@ trap(struct trapframe *tf)
       }
     }
     break;
-
+  }
   //PAGEBREAK: 13
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){
@@ -143,14 +146,15 @@ trap(struct trapframe *tf)
     exit();
 }
 
-void
-calpgfault(struct perfdata *data)
-{
-  if(pgrecording == 0){
-    pgrecording = 1;
-  }else{
-    data->pgfault = pgfault;
-    pgrecording = 0;
-    pgfault = 0;
-  }  
-}
+
+// void
+// calpgfault(struct perfdata *data)
+// {
+//   if(pgrecording == 0){
+//     pgrecording = 1;
+//   }else{
+//     data->pgfault = pgfault;
+//     pgrecording = 0;
+//     pgfault = 0;
+//   }  
+// }
