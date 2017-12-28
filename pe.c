@@ -80,31 +80,32 @@ int main(int argc, char *argv[]){
         }
         
         wait();
+        cmd->test_cmd = argv[2];
         cmd->arg1 = pid;
         cmd->cmd = "end";
         perf_stat(cmd,ed);
 
-        printf(1,"\nstart ticks: %d\n",st->ticks);
-        printf(1,"start conswch: %d\n",st->conswch);
-        printf(1,"start pgfault: %d\n",st->pgfault);
-        printf(1,"\nend ticks: %d\n",ed->ticks);
-        printf(1,"end conswch: %d\n",ed->conswch);
-        printf(1,"end pgfault: %d\n\n",ed->pgfault);
 
-        int ticks;
-        int cxtsw;
-        int cpusw;
-        int pgfault;
-        ticks = (ed->ticks - st->ticks);
-        cxtsw = (ed->conswch - st->conswch);
-        cpusw = ed->cpuswch - st->cpuswch;
-        pgfault = ed->pgfault - st->pgfault;
+        printf(1,"instruction: %s\n",cmd->test_cmd);
+        printf(1,"total ticks: %d\n",ed->totalticks);
+        printf(1,"cpu ticks: %d\n",ed->cputicks);
+        printf(1,"conswch: %d\n",ed->conswch);
+        printf(1,"pgfault: %d\n\n",ed->pgfault);
 
-        printf(1,"done! %d\n",pid);
-        printf(1,"ticks: %d\n",ticks);
-        printf(1,"context switch: %d\n",cxtsw);
-        printf(1,"cpu switch: %d\n",cpusw);
-        printf(1,"page fault: %d\n",pgfault);
+        // int ticks;
+        // int cxtsw;
+        // int cpusw;
+        // int pgfault;
+        // ticks = (ed->ticks - st->ticks);
+        // cxtsw = (ed->conswch - st->conswch);
+        // cpusw = ed->cpuswch - st->cpuswch;
+        // pgfault = ed->pgfault - st->pgfault;
+
+        // printf(1,"done! %d\n",pid);
+        // printf(1,"ticks: %d\n",ticks);
+        // printf(1,"context switch: %d\n",cxtsw);
+        // printf(1,"cpu switch: %d\n",cpusw);
+        // printf(1,"page fault: %d\n",pgfault);
     }
 
     exit();

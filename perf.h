@@ -1,11 +1,13 @@
 struct perfdata {
-    uint ticks;
+    uint totalticks; //including sleeping and wait..
+    uint cputicks;
 	int conswch;
 	int pgfault;
 	int cpuswch;
 };
 
 struct perfcmd{
+    char* test_cmd;
     char* cmd; //
     int arg1; // specific pid, if 0 -> system level
 };
@@ -15,4 +17,8 @@ struct perf_record{
     int pid;
     int cxtsw;
     int pgfault;
+    int _ticks;
+    int sumticks;
+    int startticks; //start timestamp;
+    int endticks;
 };

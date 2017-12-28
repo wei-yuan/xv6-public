@@ -51,6 +51,42 @@ struct perf_record* getperf(int pid){
   return 0;
 }
 
+void perf_end_period(int pid){
+  struct perf_record* pr = getperf(pid);
+  if(pr){
+    if(pr->_ticks<0){
+      panic("_ticks < 0 ");
+    }
+    pr->sumticks += ticks - pr->_ticks;
+    pr->_ticks = -1;
+  }
+}
+
+void perf_start_period(int pid){
+  struct perf_record* pr = getperf(pid);
+  if(pr){
+    if(pr->_ticks >= 0){
+      panic("_ticks >= 0 ");
+    }
+    pr->_ticks = ticks;
+  }
+}
+
+void perf_end_recording(int pid){
+  struct perf_record* r = getperf(pid);
+  if(r && r->recording){
+    r->endticks = ticks;
+    r->recording = 0;
+  }
+}
+
+void perf_inc_context_swtch(int pid){
+  struct perf_record* r = getperf(pid);
+  if(r && r->recording){
+    r->cxtsw ++;
+  }
+}
+
 // Must be called with interrupts disabled
 int
 cpuid() {
@@ -288,6 +324,8 @@ exit(void)
 
   // Jump into the scheduler, never to return.
   curproc->state = ZOMBIE;
+  perf_end_period(curproc->pid);
+  perf_end_recording(curproc->pid);
   sched();
   panic("zombie exit");
 }
@@ -370,6 +408,7 @@ scheduler(void)
       // before jumping back to us.
       c->proc = p;
       switchuvm(p);
+      perf_start_period(p->pid);
       p->state = RUNNING;
       swtch(&(c->scheduler), p->context);
       switchkvm();
@@ -405,10 +444,7 @@ sched(void)
   if(readeflags()&FL_IF)
     panic("sched interruptible");
   intena = mycpu()->intena;
-
-  struct perf_record* r = getperf(p->pid);
-  if(r && r->recording)r->cxtsw++; 
-  
+  perf_inc_context_swtch(p->pid);
   swtch(&p->context, mycpu()->scheduler);
   mycpu()->intena = intena;
 }
@@ -420,6 +456,7 @@ yield(void)
   
   acquire(&ptable.lock);  //DOC: yieldlock
   myproc()->state = RUNNABLE;
+  perf_end_period(myproc()->pid);
   sched();
   release(&ptable.lock);
 }
@@ -471,7 +508,7 @@ sleep(void *chan, struct spinlock *lk)
   // Go to sleep.
   p->chan = chan;
   p->state = SLEEPING;
-
+  perf_end_period(p->pid);
   sched();
 
   // Tidy up.
@@ -576,6 +613,10 @@ struct perf_record* setperf(int pid){
     i->pid = pid;
     i->cxtsw = 0;
     i->pgfault = 0;
+    i->sumticks = 0;
+    i->startticks = ticks;
+    i->endticks = 0;
+    i->_ticks = ticks;
     //lock?
     i->recording = 1;
     return i;
@@ -588,7 +629,10 @@ int fillperf(int pid, struct perfdata *data){
   if(res){
     cprintf("fill? %d\n",res->pid);
     data->conswch = res->cxtsw;
+    //Page fault not working...
     data->pgfault = res->pgfault;
+    data->totalticks = res->endticks - res->startticks;
+    data->cputicks = res->sumticks;
     //lock?
     res->recording = 0;
     return 0;
