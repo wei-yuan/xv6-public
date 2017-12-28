@@ -114,6 +114,13 @@ sys_perf_stat(void)
   argptr(1, (void*)&data, sizeof(*data)) < 0) {
     return -1;
   }
-  fillperfdata(data);
+
+  if(cmd->arg1<0){
+    return -1;
+  }
+
+  cprintf("sys_perf_stat %s\n",cmd->cmd);
+  
+  fillperfdata(cmd, data);
   return 0;
 }

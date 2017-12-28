@@ -15,6 +15,12 @@ struct {
   struct proc proc[NPROC];
 } ptable;
 
+struct perecd{
+  int pid;
+  int recording;
+  int cxtsw;
+} perecdtable[NPROC];
+
 static struct proc *initproc;
 
 int nextpid = 1;
@@ -26,11 +32,19 @@ static void wakeup1(void *chan);
 int conswch; // context switch counts
 int csrecording = 0; // context switch recording
 
+void 
+initperf(void)
+{
+  memset(perecdtable, 0, sizeof(perecdtable));
+}
+
 void
 pinit(void)
 {
   initlock(&ptable.lock, "ptable");
+  initperf();
 }
+
 
 // Must be called with interrupts disabled
 int
@@ -560,11 +574,71 @@ calconswch(struct perfdata *data)
   }  
 }
 
-void
-fillperfdata(struct perfdata *data)
+
+//find available and init
+int setperf(int pid){
+  struct perecd* i;
+  for( i = perecdtable; i < &perecdtable[NPROC]; i++){
+    if(i->recording)
+      continue;
+    //found!
+    i->pid = pid;
+    //lock?
+    i->recording = 1;
+    cprintf("set? %x <- %d\n",i, pid);
+    return 0;
+  }
+  return -1;
+}
+
+struct perecd* getperf(int pid){
+  struct perecd* i;
+  for( i = perecdtable; i < &perecdtable[NPROC]; i++){
+    if(i->pid == pid){
+      cprintf("get? %x -> %d\n",i,pid);
+      return i;
+    }
+  }
+  return 0;
+}
+
+int fillperf(int pid, struct perfdata *data){
+  struct perecd* res = getperf(pid);
+  if(res){
+    cprintf("fill? %d\n",res->pid);
+    data->conswch = res->cxtsw;
+    //lock?
+    res->recording = 0;
+    return 0;
+  }
+  return -1;
+}
+
+int
+strcompare(const char *p, const char *q)
 {
-  // context switch
-  calconswch(data);   
-  // page fault
-  calpgfault(data);
+  while(*p && *p == *q)
+    p++, q++;
+  return (uchar)*p - (uchar)*q;
+}
+
+void
+fillperfdata(struct perfcmd* cmd, struct perfdata *data)
+{
+
+  if(strcompare(cmd->cmd,"start") == 0){
+    setperf(cmd->arg1);
+    return;
+  }
+
+  if(strcompare(cmd->cmd,"end") == 0){
+    fillperf(cmd->arg1,data);
+    return;
+  }
+
+  return;
+  // // context switch
+  // calconswch(data);   
+  // // page fault
+  // calpgfault(data);
 }

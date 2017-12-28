@@ -122,7 +122,7 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-void            fillperfdata(struct perfdata*);
+void            fillperfdata(struct perfcmd* ,struct perfdata*);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

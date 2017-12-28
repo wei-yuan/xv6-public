@@ -72,16 +72,16 @@ int main(int argc, char *argv[]){
         pid = fork();
 
         if(pid == 0){
-            cmd->arg1 = getpid();
-            printf(1,"begin %d\n",cmd->arg1);
-            perf_stat(cmd,st);
-            exec(argv[2], &argv[2]);
-
-            exit();
+          cmd->cmd = "start";
+          cmd->arg1 = getpid();
+          printf(1,"begin %d\n",cmd->arg1);
+          perf_stat(cmd,st);
+          exec(argv[2], &argv[2]);
         }
-        cmd->arg1 = pid;
         
         wait();
+        cmd->arg1 = pid;
+        cmd->cmd = "end";
         perf_stat(cmd,ed);
 
         printf(1,"\nstart ticks: %d\n",st->ticks);
