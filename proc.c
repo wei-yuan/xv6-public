@@ -15,10 +15,10 @@ struct {
   struct proc proc[NPROC];
 } ptable;
 
-struct spinlock lock2;
-
-
-struct perf_record perf_recordtable[NPROC];
+struct {
+  struct spinlock lock;
+  struct perf_record perfs[NPROC];
+} perf_table;
 
 static struct proc *initproc;
 
@@ -27,27 +27,17 @@ extern void forkret(void);
 extern void trapret(void);
 
 static void wakeup1(void *chan);
-
-int conswch; // context switch counts
-int csrecording = 0; // context switch recording
-
+/* Perf */
 void 
 initperf(void)
 {
-  memset(perf_recordtable, 0, sizeof(perf_recordtable));
-}
-
-void
-pinit(void)
-{
-  initlock(&ptable.lock, "ptable");
-  initlock(&lock2,"perf");
-  initperf();
+  initlock(&perf_table.lock,"perf");
+  memset(perf_table.perfs, 0, sizeof(perf_table.perfs));
 }
 
 struct perf_record* getperf(int pid){
   struct perf_record* i;
-  for( i = perf_recordtable; i < &perf_recordtable[NPROC]; i++){
+  for( i = perf_table.perfs; i < &perf_table.perfs[NPROC]; i++){
     if(i->pid == pid){
       return i;
     }
@@ -98,6 +88,99 @@ void perf_inc_context_swtch(int pid){
   if(r && r->recording){
     r->cxtsw ++;
   }
+}
+
+//find available and init
+struct perf_record* startperf(int pid){
+  struct perf_record* i;
+  
+  acquire(&perf_table.lock);
+  for( i = perf_table.perfs; i < &perf_table.perfs[NPROC]; i++){
+    if(i->recording)
+      continue;
+    //found and init;
+    i->pid = pid;
+    i->cxtsw = 0;
+    i->pgfault = 0;
+    i->sumticks = 0;
+    i->startticks = ticks;
+    i->endticks = 0;
+    i->cpuid = -1;
+    i->cpusw = 0;
+    i->_ticks = ticks;
+    //lock?
+    i->recording = 1;
+    release(&perf_table.lock);
+    return i;
+  }
+  
+  release(&perf_table.lock);
+  return 0;
+}
+
+int stopperf(int pid, struct perfdata *data){
+  struct perf_record* res = getperf(pid);
+  acquire(&perf_table.lock);
+  if(res){
+    data->conswch = res->cxtsw;
+    //Page fault not working...
+    data->pgfault = res->pgfault;
+    data->totalticks = res->endticks - res->startticks;
+    data->cputicks = res->sumticks;
+    data->cpuswch = res->cpusw;
+    //lock?
+    res->recording = 0;
+    release(&perf_table.lock);    
+    return 0;
+  }
+  release(&perf_table.lock);
+  return -1;
+}
+
+//return 0 if equal.
+int
+strcompare(const char *p, const char *q)
+{
+  while(*p && *p == *q)
+    p++, q++;
+  return (uchar)*p - (uchar)*q;
+}
+
+
+int
+sys_perf_stat(void)
+{
+  struct perfcmd* cmd;
+  struct perfdata* data;
+
+  if(argptr(0, (void*)&cmd, sizeof(*cmd)) < 0 || argptr(1, (void*)&data, sizeof(*data)) < 0) {
+    return -1;
+  }
+
+  if(cmd->arg1<0){
+    return -1;
+  }  
+
+  if(strcompare(cmd->cmd,"start") == 0){
+    startperf(cmd->arg1);
+    return 0;
+  }
+
+  if(strcompare(cmd->cmd,"end") == 0){
+    stopperf(cmd->arg1,data);
+    return 0;
+  }
+
+  return -1;
+}
+
+/* End perf*/
+
+void
+pinit(void)
+{
+  initlock(&ptable.lock, "ptable");
+  initperf();
 }
 
 // Must be called with interrupts disabled
@@ -617,86 +700,4 @@ procdump(void)
   }
 }
 
-//find available and init
-struct perf_record* startperf(int pid){
-  struct perf_record* i;
-  
-  acquire(&lock2);
-  for( i = perf_recordtable; i < &perf_recordtable[NPROC]; i++){
-    if(i->recording)
-      continue;
-    //found and init;
-    i->pid = pid;
-    i->cxtsw = 0;
-    i->pgfault = 0;
-    i->sumticks = 0;
-    i->startticks = ticks;
-    i->endticks = 0;
-    i->cpuid = -1;
-    i->cpusw = 0;
-    i->_ticks = ticks;
-    //lock?
-    i->recording = 1;
-    release(&lock2);
-    return i;
-  }
-  
-  release(&lock2);
-  return 0;
-}
 
-int stopperf(int pid, struct perfdata *data){
-  struct perf_record* res = getperf(pid);
-  acquire(&lock2);
-  if(res){
-    data->conswch = res->cxtsw;
-    //Page fault not working...
-    data->pgfault = res->pgfault;
-    data->totalticks = res->endticks - res->startticks;
-    data->cputicks = res->sumticks;
-    data->cpuswch = res->cpusw;
-    //lock?
-    res->recording = 0;
-    release(&lock2);    
-    return 0;
-  }
-  release(&lock2);
-  return -1;
-}
-
-//return 0 if equal.
-int
-strcompare(const char *p, const char *q)
-{
-  while(*p && *p == *q)
-    p++, q++;
-  return (uchar)*p - (uchar)*q;
-}
-
-
-int
-sys_perf_stat(void)
-{
-  struct perfcmd* cmd;
-  struct perfdata* data;
-
-  if(argptr(0, (void*)&cmd, sizeof(*cmd)) < 0 || argptr(1, (void*)&data, sizeof(*data)) < 0) {
-    return -1;
-  }
-
-  if(cmd->arg1<0){
-    return -1;
-  }  
-
-  if(strcompare(cmd->cmd,"start") == 0){
-    startperf(cmd->arg1);
-    return 0;
-  }
-
-  if(strcompare(cmd->cmd,"end") == 0){
-    stopperf(cmd->arg1,data);
-    return 0;
-  }
-
-  return -1;
-}
