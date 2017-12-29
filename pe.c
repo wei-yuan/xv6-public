@@ -47,18 +47,15 @@ int main(int argc, char *argv[]){
     }
 
     struct perfcmd *cmd ;
-    struct perfdata *st, *ed ;
+    struct perfdata *ed ;
 
     cmd = malloc(sizeof(*cmd));
     memset(cmd, 0, sizeof(*cmd));
 
-    st = malloc(sizeof(*st));
-    memset(st, 0, sizeof(*st));
-
     ed = malloc(sizeof(*ed));
     memset(ed, 0, sizeof(*ed));
 
-    //pe stat
+    //perf stat
     if(strcmp(argv[1],"stat") == 0){
 
         if(argc < 3){
@@ -75,7 +72,7 @@ int main(int argc, char *argv[]){
         if(pid == 0){
           cmd->cmd = "start";
           cmd->arg1 = getpid();
-          perf_stat(cmd,st);
+          perf_stat(cmd,0);
           exec(argv[2], &argv[2]);
         }
         
@@ -85,22 +82,12 @@ int main(int argc, char *argv[]){
         cmd->cmd = "end";
         perf_stat(cmd,ed);
 
-
-        //printf(1,"instruction: %s\n",cmd->test_cmd);
-        //printf(1,"total ticks: %d\n",ed->totalticks);
-        //printf(1,"cpu ticks: %d\n",ed->cputicks);
-        //printf(1,"conswch: %d\n",ed->conswch);
-        //printf(1,"pgfault: %d\n",ed->pgfault);
-        //printf(1,"cpuswch: %d\n\n",ed->cpuswch);
-
         printf(1, "\nPerformance counter stats for '%s':\n\n", cmd->test_cmd);
         printfms("page-faults               ", ed->pgfault);
         printfms("context-switches          ", ed->conswch);
         printfms("cpu-ticks                 ", ed->cputicks);
         printfms("cpu-migrations            ", ed->cpuswch);        
         printf(1, "\n");
-
     }
-
     exit();
 }
