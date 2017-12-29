@@ -15,7 +15,6 @@ extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
 int pgfault; // page fault counts
-int pgrecording = 0; // page fault recording
 
 void
 tvinit(void)
@@ -144,16 +143,3 @@ trap(struct trapframe *tf)
   if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)
     exit();
 }
-
-
-// void
-// calpgfault(struct perfdata *data)
-// {
-//   if(pgrecording == 0){
-//     pgrecording = 1;
-//   }else{
-//     data->pgfault = pgfault;
-//     pgrecording = 0;
-//     pgfault = 0;
-//   }  
-// }

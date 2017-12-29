@@ -122,7 +122,6 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
-void            fillperfdata(struct perfcmd* ,struct perfdata*);
 struct perf_record* getperf(int);
 
 // swtch.S
@@ -170,7 +169,6 @@ void            idtinit(void);
 extern uint     ticks;
 void            tvinit(void);
 extern struct spinlock tickslock;
-void            calpgfault(struct perfdata*);
 
 // uart.c
 void            uartinit(void);
