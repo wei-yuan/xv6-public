@@ -55,6 +55,15 @@ struct perf_record* getperf(int pid){
   return 0;
 }
 
+void perf_add_if_cpu_sw(int pid, int apicid){
+    struct perf_record* pr = getperf(pid);
+    if(pr){
+      if(pr->cpuid != -1 && pr->cpuid!=apicid)
+        pr->cpusw++;
+      pr->cpuid = apicid;
+    }
+}
+
 void perf_end_period(int pid){
   struct perf_record* pr = getperf(pid);
   if(pr){
@@ -412,6 +421,7 @@ scheduler(void)
       // before jumping back to us.
       c->proc = p;
       switchuvm(p);
+      perf_add_if_cpu_sw(p->pid, c->apicid);
       perf_start_period(p->pid);
       p->state = RUNNING;
       swtch(&(c->scheduler), p->context);
@@ -622,6 +632,8 @@ struct perf_record* startperf(int pid){
     i->sumticks = 0;
     i->startticks = ticks;
     i->endticks = 0;
+    i->cpuid = -1;
+    i->cpusw = 0;
     i->_ticks = ticks;
     //lock?
     i->recording = 1;
@@ -642,6 +654,7 @@ int stopperf(int pid, struct perfdata *data){
     data->pgfault = res->pgfault;
     data->totalticks = res->endticks - res->startticks;
     data->cputicks = res->sumticks;
+    data->cpuswch = res->cpusw;
     //lock?
     res->recording = 0;
     release(&lock2);    

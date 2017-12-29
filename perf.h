@@ -21,4 +21,6 @@ struct perf_record{
     int sumticks;
     int startticks;
     int endticks;
+    int cpuid;
+    int cpusw;
 };
