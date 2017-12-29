@@ -34,7 +34,7 @@ printfms(char *s, int n)
     }
     printf(1, "  %d %s#      %d%s%d M/sec\n", n, s, n/1000000, result, n);
   } else {
-    printf(1, "  0 %s#      0 M/sec\n", s);
+    printf(1, "  0  %s#      0 M/sec\n", s);
   }
 }
 
