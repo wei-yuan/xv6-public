@@ -24,3 +24,9 @@ struct perf_record{
     int cpuid;
     int cpusw;
 };
+
+// for any string pair structure
+struct perfoutput {
+    const char* title;
+    const char* descript; // description
+};

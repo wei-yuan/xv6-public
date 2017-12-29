@@ -3,6 +3,24 @@
 #include "user.h"
 #include "perf.h"
 
+const char hardware_event[] = "[Hardware event]";
+const char software_event[] = "[Software event]";
+const char Hardware_cache_event[] = "[Hardware cache event]";
+const char list_event_message[] = "List of pre-defined events:";
+const char usage_message[] = "usage: perf [FLAG] [COMMAND] [ARGS]";
+const char common_message[] = "The most commonly used perf commands are:";
+struct perfoutput help_output[] = {
+    { "list            ", "List all symbolic event types" },
+    { "stat            ", "Run a command and gather performance counter statistics" },
+    { "sched           ", "Tool to trace/measure scheduler properties (latencies)" }
+};
+struct perfoutput list_output[] = {
+  { "cpu-migrations OR migrations               ", software_event },    
+  { "cpu-ticks                                  ", software_event },  
+  { "page-faults OR faults                      ", software_event },
+  { "context-switches OR cs                     ", software_event }
+};
+
 int
 count_digit(int n)
 {
@@ -38,11 +56,47 @@ printfms(char *s, int n)
   }
 }
 
+void
+perf_help(void)
+{
+  int i, array_size;
+  array_size = sizeof(help_output) / sizeof(struct perfoutput);
+  printf(1, "\n %s\n\n", usage_message);
+  printf(1, " %s\n", common_message);
+  for (i = 0; i < array_size; i++) {
+    printf(1, "   %s%s\n", help_output[i].title, help_output[i].descript);
+  }
+  printf(1, "\n");
+}
+
+void
+perf_list(void)
+{
+  int i, array_size;
+  array_size = sizeof(list_output) / sizeof(struct perfoutput);
+  printf(1, "\n %s\n\n", list_event_message);
+  for (i = 0; i < array_size; i++) {
+    printf(1, "   %s%s\n", list_output[i].title, list_output[i].descript);
+  }
+  printf(1, "\n");
+}
+
 int main(int argc, char *argv[]){
 
-    //perf stat ls
     if(argc <= 1){
         printf(2,"few arguments\n");
+        exit();
+    }
+
+    //perf help
+    if(strcmp(argv[1],"help") == 0){
+        perf_help();
+        exit();
+    }
+
+    //perf list 
+    if(strcmp(argv[1],"list") == 0){
+        perf_list();
         exit();
     }
 
