@@ -4,35 +4,38 @@
 #include "perf.h"
 
 int
-countdigit(int n)
+count_digit(int n)
 {
   int f = n;
   int digit = 1;
   for (;;) {
     f /= 10;
-    if (f == 0) 
+    if (f == 0)
       break;
     digit++;
   }
   return digit;
 }
 
-char* 
-calms(int n)
+void
+printfms(char *s, int n)
 {
-  const char zero_point[] = "0.";
+  const char point[] = ".";
   const char zero[] = "0";
-  char *result;
-  result = "";
-  result = strcat(result, zero_point);
-
-  int i;
-  // one million has six zero digit
-  int zero_num = 6 - countdigit(n);
-  for (i = 0; i < zero_num; i++) {
-    result = strcat(result, zero);  
+  char result[] = "\0";
+  
+  if (n != 0) {
+    // one million has six zero digit
+    int zero_num = 6 - count_digit(n);
+    int i;
+    strcat(result, point);        
+    for (i = 0; i < zero_num; i++) {
+      strcat(result, zero);    
+    }
+    printf(1, "  %d %s#      %d%s%d M/sec\n", n, s, n/1000000, result, n);
+  } else {
+    printf(1, "  0 %s#      0 M/sec\n", s);
   }
-  return result;
 }
 
 int main(int argc, char *argv[]){
@@ -82,13 +85,17 @@ int main(int argc, char *argv[]){
         cmd->cmd = "end";
         perf_stat(cmd,ed);
 
+        //printf(1,"instruction: %s\n",cmd->test_cmd);
+        //printf(1,"total ticks: %d\n",ed->totalticks);
+        //printf(1,"cpu ticks: %d\n",ed->cputicks);
+        //printf(1,"conswch: %d\n",ed->conswch);
+        //printf(1,"pgfault: %d\n\n",ed->pgfault);
 
-        printf(1,"instruction: %s\n",cmd->test_cmd);
-        printf(1,"total ticks: %d\n",ed->totalticks);
-        printf(1,"cpu ticks: %d\n",ed->cputicks);
-        printf(1,"conswch: %d\n",ed->conswch);
-        printf(1,"pgfault: %d\n\n",ed->pgfault);
-
+        printf(1, "\nPerformance counter stats for '%s':\n\n", cmd->test_cmd);
+        printfms("page-faults               ", ed->pgfault);
+        printfms("context-switches          ", ed->conswch);
+        printfms("cpu-ticks                 ", ed->cputicks);
+        printf(1, "\n");
     }
 
     exit();

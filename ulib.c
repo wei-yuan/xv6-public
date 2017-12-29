@@ -104,7 +104,7 @@ memmove(void *vdst, void *vsrc, int n)
   return vdst;
 }
 
-char *
+void
 strcat(char *dst, const char *src)
 {
     int i,j;
@@ -113,5 +113,5 @@ strcat(char *dst, const char *src)
     for (j = 0; src[j] != '\0'; j++)
         dst[i+j] = src[j];
     dst[i+j] = '\0';
-    return dst;
+    //return dst;
 }
