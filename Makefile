@@ -176,7 +176,6 @@ UPROGS=\
 	_wc\
 	_zombie\
 	_perf\
-	_pe\
 	_sleep\
 	_date\
 
