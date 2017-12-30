@@ -11,11 +11,11 @@ main(void)
 
     if(err == 1)
     {
-        printf(1, "Test system call psched success: %d", err);
+        //Do nothing
     } 
     else
     {
-        printf(1, "Test system call psched fail: %d\n", err);
+        printf(1, "\nTest system call psched fail: %d\n", err);
     }
         
     exit();

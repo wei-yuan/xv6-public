@@ -6,8 +6,8 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
-/* variable ticks is in trap.c */
-//#include "traps.h"
+/* pshed, using same header file perf.h*/
+#include "perf.h"
 
 struct {
   struct spinlock lock;
@@ -201,6 +201,9 @@ fork(void)
   np->sz = curproc->sz;
   np->parent = curproc;
   *np->tf = *curproc->tf;
+  
+  /* get start tick count here */
+  np->startTicks = ticks;
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
@@ -265,6 +268,16 @@ exit(void)
 
   // Jump into the scheduler, never to return.
   curproc->state = ZOMBIE;
+  /* perf sched get end tick count here */     
+  //cprintf("\n----Exit()----\n");
+  
+/*    
+  curproc->endTicks = ticks;
+  cprintf("curproc->pid: %d\t", curproc->pid);
+  cprintf("curproc->name: %s\t", curproc->name);
+  cprintf("curproc->endTicks: %d\n", curproc->endTicks);
+  cprintf("\n----End Exit()----\n");
+*/  
   sched();
   panic("zombie exit");
 }
@@ -337,24 +350,34 @@ scheduler(void)
     /* round robin scheduling */
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE) // check if the process state is runnable or not
-        continue;
+      {
+        //cprintf("head of round robin, tick = %d\n", ticks);
+        continue;       
+      }
+      //cprintf("\n----head of round robin, tick = %d\n", ticks);
 
-      /* get tick count here */
-      p->proc_ticks = ticks;
-      
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
+      
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
+      
+      //if(p->state != ZOMBIE)
+        p->endTicks = ticks;
+      //cprintf("\n----p->endTicks = %d\n", p->endTicks);
+      //cprintf("\n----tail of round robin, tick = %d\n", ticks);
 
+      //cprintf("p->endTicks: %d\n", p->endTicks);
+      //cprintf("ticks: %d\n", ticks);
+      //cprintf("----Round Robin tick end----\n");
       // Process is done running for now.
       // It should have changed its p->state before coming back.
-      c->proc = 0;
+      c->proc = 0;     
     }
     release(&ptable.lock);
 
@@ -393,6 +416,8 @@ yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
   myproc()->state = RUNNABLE;
+  /* perf sched get end tick count here */
+  
   sched();
   release(&ptable.lock);
 }
@@ -444,6 +469,8 @@ sleep(void *chan, struct spinlock *lk)
   // Go to sleep.
   p->chan = chan;
   p->state = SLEEPING;
+
+  /* perf sched get end tick count here */
 
   sched();
 
@@ -544,3 +571,112 @@ perf(char* flag)
 {
   perfcontext(flag);
 }
+
+/* perf sched start here */
+struct schedRecProc schedRecProc[NPROC]; //record table
+
+int
+getTicks(void)
+{
+  uint xticks;
+
+  xticks = ticks;
+  return xticks;
+}
+
+//struct perf_record perf_recordtable[NPROC];
+/*
+struct perf_record* getperf(int pid){
+  struct perf_record* i;
+  for( i = perf_recordtable; i < &perf_recordtable[NPROC]; i++){
+    if(i->pid == pid){
+      return i;
+    }
+  }
+  return 0;
+}
+
+void perf_end_period(int pid){
+  struct perf_record* pr = getperf(pid);
+  if(pr){
+    if(pr->_ticks<0){
+      panic("_ticks < 0 ");
+    }
+    pr->sumticks += ticks - pr->_ticks;
+    pr->_ticks = -1;
+  }
+}
+
+void perf_start_period(int pid){
+  struct perf_record* pr = getperf(pid);
+  if(pr){
+    if(pr->_ticks >= 0){
+      panic("_ticks >= 0 ");
+    }
+    pr->_ticks = ticks;
+  }
+}
+
+void perf_end_recording(int pid){
+  struct perf_record* r = getperf(pid);
+  if(r && r->recording){
+    r->endticks = ticks;
+    r->recording = 0;
+  }
+}
+*/
+
+void 
+copyProc(struct schedRecProc *rp, struct proc * p, int idx){
+  rp = &schedRecProc[idx];
+  rp->pid = p->pid;
+  rp->startTicks = p->startTicks;
+  rp->endTicks = p->endTicks;
+  // copy char array content from p->name to rp->name
+  safestrcpy(rp->name, p->name, sizeof(rp->name));   
+}
+
+int
+sys_psched(void)
+{
+  // process struct pointer
+  struct proc *p;
+  struct schedRecProc* rp;
+
+  //cprintf("Task\t|\tRuntime ms\t|\tSwitches\t|\tAverage delay ms\t|\tMaximum delay ms\n");
+  cprintf("PID\t|\tStart\t|\tEnd\t|\tDuration\t|\tSum of tick\t|\tName\t\n");  
+  
+  //init
+  int idx = 0;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if(p->pid == 0)continue;
+
+    rp = &schedRecProc[idx]; //init
+    copyProc(rp, p, idx);
+    idx++;
+ 
+    cprintf("%d", rp->pid);
+    cprintf("\t|\t");
+
+    cprintf("%d", rp->startTicks);
+    cprintf("\t|\t");
+
+    cprintf("%d", rp->endTicks);
+    cprintf("\t|\t");
+
+    if(rp->endTicks == 0)
+      cprintf("%d", ticks - rp->startTicks);
+    else
+      cprintf("%d", rp->endTicks - rp->startTicks);
+    cprintf("\t\t|\t");
+    
+    cprintf("%s", rp->sumTicks);
+    cprintf("\t\t|\t");
+    
+    cprintf("%s", rp->name);
+    cprintf("\n");  
+  }
+  return 1;
+}
+/* perf sched end*/

@@ -127,6 +127,7 @@ void            wakeup(void*);
 void            yield(void);
 void            perf(char*);
 int             psched(void);
+struct perf_record* getperf(int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
